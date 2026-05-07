@@ -111,7 +111,7 @@ const [messages, setMessages] = useState<
   setValue("");
 
   try {
-    const res = await fetch("/api/chat", {
+    const res = await fetch("https://murielgg.app.n8n.cloud/mcp-server/http", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
