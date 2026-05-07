@@ -17,7 +17,7 @@ export const Route = createFileRoute("/")({
   }),
 });
 
-const MAX_SCROLL = 400;
+const MAX_SCROLL = 600;
 
 function clamp(val: number, min: number, max: number) {
   return Math.min(Math.max(val, min), max);
@@ -43,7 +43,7 @@ function Index() {
     //messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const orbScale = 1 - progress * (1 - 0.75);
+  const orbScale = 1 - progress * (1 - 0.3);
   const isFinal = progress >= 1;
   const orbTranslateY = 0;
 
