@@ -19,8 +19,7 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const [value, setValue] = useState("");
-
-const [messages, setMessages] = useState<
+  const [messages, setMessages] = useState<
     { role: "user" | "assistant"; content: string }[]
   >([]);
 
@@ -62,79 +61,98 @@ const [messages, setMessages] = useState<
       </header>
 
       {/* Center stage */}
-      <section className="relative z-10 flex flex-1 flex-col items-center justify-center px-6 -mt-8">
-        <EnergyOrb />
-
-        <div className="mt-2 text-center animate-fade-in">
-          <h1 className="text-4xl md:text-5xl font-light tracking-tight text-foreground">
-            Hola.
-          </h1>
-          <p className="mt-3 text-base md:text-lg font-light text-muted-foreground">
-            ¿En qué puedo ayudarte hoy?
-          </p>
+      <section
+        className={`relative z-10 flex flex-col items-center px-6 transition-all duration-500 ${
+          messages.length > 0
+            ? "pt-6 justify-start"
+            : "flex-1 justify-center -mt-8"
+        }`}
+      >
+        {/* Orb — small when chatting, large when idle */}
+        <div
+          className={`transition-all duration-500 ${
+            messages.length > 0 ? "w-16 h-16" : ""
+          }`}
+        >
+          <EnergyOrb />
         </div>
+
+        {/* Welcome text — only shown before any messages */}
+        {messages.length === 0 && (
+          <div className="mt-2 text-center animate-fade-in">
+            <h1 className="text-4xl md:text-5xl font-light tracking-tight text-foreground">
+              Hola.
+            </h1>
+            <p className="mt-3 text-base md:text-lg font-light text-muted-foreground">
+              ¿En qué puedo ayudarte hoy?
+            </p>
+          </div>
+        )}
+
+        {/* Messages — shown below the orb when chatting */}
+        {messages.length > 0 && (
+          <div className="w-full max-w-xl space-y-3 px-2 mt-4 overflow-y-auto max-h-[60vh]">
+            {messages.map((msg, i) => (
+              <div
+                key={i}
+                className={`text-sm md:text-base px-4 py-2 rounded-2xl max-w-[80%] ${
+                  msg.role === "user"
+                    ? "ml-auto bg-primary/10 text-foreground"
+                    : "mr-auto bg-muted text-muted-foreground"
+                }`}
+              >
+                {msg.content}
+              </div>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Bottom input */}
-      <footer className="relative z-10 px-6 pb-10">
-        
-<div className="mx-auto mb-6 w-full max-w-xl space-y-3 px-2">
-  {messages.map((msg, i) => (
-    <div
-      key={i}
-      className={`text-sm md:text-base px-4 py-2 rounded-2xl max-w-[80%] ${
-        msg.role === "user"
-          ? "ml-auto bg-primary/10 text-foreground"
-          : "mr-auto bg-muted text-muted-foreground"
-      }`}
-    >
-      {msg.content}
-    </div>
-  ))}
-</div>
-
+      <footer className="relative z-10 px-6 pb-10 mt-auto">
         <form
-         onSubmit={async (e) => {
-  e.preventDefault();
+          onSubmit={async (e) => {
+            e.preventDefault();
 
-  if (!value.trim()) return;
+            if (!value.trim()) return;
 
-  const userMessage = value;
+            const userMessage = value;
 
-  // Añadir mensaje del usuario
-  setMessages((prev) => [
-    ...prev,
-    { role: "user", content: userMessage },
-  ]);
+            setMessages((prev) => [
+              ...prev,
+              { role: "user", content: userMessage },
+            ]);
 
-  // Limpiar input
-  setValue("");
+            setValue("");
 
-  try {
-    const res = await fetch("https://murielgg.app.n8n.cloud/webhook/dba585f4-889e-4a1c-97ec-48eaef2cdae9", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({ message: userMessage }),
-});
+            try {
+              const res = await fetch(
+                "https://murielgg.app.n8n.cloud/webhook/dba585f4-889e-4a1c-97ec-48eaef2cdae9",
+                {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({ message: userMessage }),
+                }
+              );
 
-const reply = await res.text();
+              const reply = await res.text();
 
-setMessages((prev) => [
-  ...prev,
-  { role: "assistant", content: reply },
-]);
-  } catch (error) {
-    setMessages((prev) => [
-      ...prev,
-      {
-        role: "assistant",
-        content: "Ha ocurrido un error al responder.",
-      },
-    ]);
-  }
-}}
+              setMessages((prev) => [
+                ...prev,
+                { role: "assistant", content: reply },
+              ]);
+            } catch (error) {
+              setMessages((prev) => [
+                ...prev,
+                {
+                  role: "assistant",
+                  content: "Ha ocurrido un error al responder.",
+                },
+              ]);
+            }
+          }}
           className="mx-auto flex w-full max-w-xl items-center gap-2 rounded-full bg-card/70 px-5 py-3 shadow-soft backdrop-blur-xl ring-1 ring-border transition focus-within:ring-2 focus-within:ring-primary/40"
         >
           <input
