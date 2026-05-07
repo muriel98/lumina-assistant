@@ -45,54 +45,7 @@ function Index() {
 
   const orbScale = 1 - progress * (1 - 0.22);
   const isFinal = progress >= 1;
- import { createFileRoute } from "@tanstack/react-router";
-import { useState, useEffect, useRef } from "react";
-import { ArrowUp, Sparkles } from "lucide-react";
-import { EnergyOrb } from "@/components/EnergyOrb";
-
-export const Route = createFileRoute("/")({
-  component: Index,
-  head: () => ({
-    meta: [
-      { title: "Aura — Asistente inteligente" },
-      {
-        name: "description",
-        content:
-          "Aura es un asistente virtual de próxima generación. Calmado, elegante y siempre presente.",
-      },
-    ],
-  }),
-});
-
-const MAX_SCROLL = 320;
-
-function clamp(val: number, min: number, max: number) {
-  return Math.min(Math.max(val, min), max);
-}
-
-function Index() {
-  const [value, setValue] = useState("");
-  const [messages, setMessages] = useState<
-    { role: "user" | "assistant"; content: string }[]
-  >([]);
-  const messagesInnerRef = useRef<HTMLDivElement>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [progress, setProgress] = useState(0);
-
-  const hasMessages = messages.length > 0;
-
-  useEffect(() => {
-    if (!messagesInnerRef.current) return;
-    const h = messagesInnerRef.current.scrollHeight;
-    const p = clamp(h / MAX_SCROLL, 0, 1);
-    setProgress(p);
-    // Scroll to bottom
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  const orbScale = 1 - progress * (1 - 0.22);
-  const isFinal = progress >= 1;
-  const orbTranslateY = isFinal ? 0 : -progress * 0.1;
+  const orbTranslateY = isFinal ? 0 : -progress * 0.5;
 
   return (
     <main className="relative h-screen w-full overflow-hidden flex flex-col">
