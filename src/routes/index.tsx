@@ -74,7 +74,7 @@ function Index() {
             messages.length > 0 ? "w-16 h-16" : ""
           }`}
         >
-          <EnergyOrb />
+          <EnergyOrb scale={messages.length === 0 ? 1 : 0.25} />
         </div>
 
         {/* Welcome text — only shown before any messages */}
