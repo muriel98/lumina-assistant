@@ -82,23 +82,15 @@ function Index() {
         </div>
       </header>
 
-      {/* Orb — fixed at top once final, otherwise floats in center moving up */}
-      {isFinal ? (
-        <div className="fixed top-6 left-0 right-0 z-20 flex justify-center pointer-events-none">
-          <EnergyOrb scale={0.22} />
-        </div>
-      ) : (
-        <div
-          className="relative z-10 flex-shrink-0 flex justify-center"
-          style={{
-            marginTop: hasMessages ? "0" : "auto",
-            marginBottom: hasMessages ? "0" : "auto",
-            transform: `translateY(${orbTranslateY}vh)`,
-            transition: "transform 1.2s cubic-bezier(0.16, 1, 0.3, 1)",
-          }}
-        >
-          <EnergyOrb scale={orbScale} />
-        </div>
+
+      <div
+  className="relative z-10 flex-shrink-0 flex justify-center"
+  style={{
+    transition: "transform 1.2s cubic-bezier(0.16, 1, 0.3, 1)",
+  }}
+>
+  <EnergyOrb scale={orbScale} />
+</div>
       )}
 
       {/* Welcome text */}
