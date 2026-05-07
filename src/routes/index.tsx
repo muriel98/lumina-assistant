@@ -43,7 +43,7 @@ function Index() {
     //messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const orbScale = 1 - progress * (1 - 0.22);
+  const orbScale = 1 - progress * (1 - 0.75);
   const isFinal = progress >= 1;
   const orbTranslateY = 0;
 
