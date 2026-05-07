@@ -45,7 +45,7 @@ function Index() {
 
   const orbScale = 1 - progress * (1 - 0.22);
   const isFinal = progress >= 1;
-  const orbTranslateY = isFinal ? 0 : -progress * 38;
+  const orbTranslateY = isFinal ? 0 : -progress * 15;
 
   return (
     <main className="relative h-screen w-full overflow-hidden flex flex-col">
