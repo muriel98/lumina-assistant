@@ -36,63 +36,66 @@
 :root {
   --radius: 1rem;
 
-  /* Luminous, airy palette */
-  --background: oklch(0.99 0.005 250);
-  --foreground: oklch(0.25 0.04 255);
+  /* Warm, organic palette — soft amber & coral on neutral cream */
+  --background: oklch(0.99 0.006 70);
+  --foreground: oklch(0.28 0.04 40);
 
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.25 0.04 255);
+  --card-foreground: oklch(0.28 0.04 40);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.25 0.04 255);
+  --popover-foreground: oklch(0.28 0.04 40);
 
-  --primary: oklch(0.68 0.16 245);          /* soft sky blue */
-  --primary-foreground: oklch(0.99 0.005 250);
+  --primary: oklch(0.72 0.15 45);            /* warm amber */
+  --primary-foreground: oklch(0.99 0.006 70);
 
-  --secondary: oklch(0.96 0.015 240);
-  --secondary-foreground: oklch(0.3 0.05 255);
+  --secondary: oklch(0.96 0.02 60);
+  --secondary-foreground: oklch(0.32 0.05 40);
 
-  --muted: oklch(0.97 0.008 245);
-  --muted-foreground: oklch(0.55 0.03 250);
+  --muted: oklch(0.97 0.012 65);
+  --muted-foreground: oklch(0.55 0.03 50);
 
-  --accent: oklch(0.92 0.05 235);
-  --accent-foreground: oklch(0.3 0.06 255);
+  --accent: oklch(0.93 0.05 55);
+  --accent-foreground: oklch(0.3 0.06 40);
 
   --destructive: oklch(0.6 0.22 25);
   --destructive-foreground: oklch(0.99 0 0);
 
-  --border: oklch(0.92 0.01 245 / 0.6);
-  --input: oklch(0.94 0.01 245);
-  --ring: oklch(0.75 0.13 240);
+  --border: oklch(0.92 0.012 60 / 0.6);
+  --input: oklch(0.94 0.012 60);
+  --ring: oklch(0.78 0.13 45);
 
-  --glow: oklch(0.78 0.15 240);
-  --glow-soft: oklch(0.9 0.08 235);
+  --glow: oklch(0.78 0.16 40);
+  --glow-soft: oklch(0.9 0.08 50);
 
-  --gradient-bg: radial-gradient(ellipse at 50% 30%, oklch(0.97 0.04 240) 0%, oklch(0.99 0.005 250) 55%, oklch(0.98 0.01 245) 100%);
-  --gradient-orb: radial-gradient(circle at 35% 30%, oklch(1 0 0 / 0.9) 0%, oklch(0.95 0.04 235 / 0.55) 40%, oklch(0.85 0.06 240 / 0.25) 75%, oklch(0.8 0.07 245 / 0.05) 100%);
-  --gradient-orb-inner: radial-gradient(circle at 32% 26%, oklch(1 0 0 / 0.7) 0%, oklch(0.97 0.03 235 / 0.2) 45%, transparent 75%);
+  --gradient-bg: radial-gradient(ellipse at 50% 30%, oklch(0.98 0.025 60) 0%, oklch(0.99 0.006 70) 55%, oklch(0.98 0.015 55) 100%);
 
-  --shadow-orb: 0 0 60px oklch(0.85 0.08 240 / 0.25), 0 0 140px oklch(0.85 0.08 240 / 0.12);
-  --shadow-soft: 0 1px 2px oklch(0.5 0.05 250 / 0.04), 0 8px 24px -8px oklch(0.5 0.1 250 / 0.08);
+  /* Inverted radial: vivid warm core → desaturated soft edges */
+  --gradient-orb: radial-gradient(circle at 50% 50%,
+    oklch(0.78 0.18 35 / 0.95) 0%,
+    oklch(0.82 0.14 45 / 0.7) 28%,
+    oklch(0.88 0.08 55 / 0.4) 55%,
+    oklch(0.94 0.04 60 / 0.15) 80%,
+    oklch(0.98 0.02 60 / 0) 100%);
+  --gradient-orb-inner: radial-gradient(circle at 50% 50%,
+    oklch(0.85 0.16 30 / 0.5) 0%,
+    transparent 60%);
+
+  --shadow-orb: 0 0 50px oklch(0.8 0.16 40 / 0.3), 0 0 130px oklch(0.85 0.12 45 / 0.18);
+  --shadow-soft: 0 1px 2px oklch(0.5 0.05 50 / 0.04), 0 8px 24px -8px oklch(0.5 0.1 50 / 0.08);
 }
 
 .dark {
-  --background: oklch(0.18 0.03 255);
-  --foreground: oklch(0.98 0.005 250);
-  --card: oklch(0.22 0.03 255);
-  --card-foreground: oklch(0.98 0.005 250);
-  --popover: oklch(0.22 0.03 255);
-  --popover-foreground: oklch(0.98 0.005 250);
-  --primary: oklch(0.78 0.15 240);
-  --primary-foreground: oklch(0.18 0.03 255);
-  --secondary: oklch(0.28 0.03 255);
-  --secondary-foreground: oklch(0.98 0.005 250);
-  --muted: oklch(0.28 0.03 255);
-  --muted-foreground: oklch(0.7 0.02 250);
-  --accent: oklch(0.3 0.05 245);
-  --accent-foreground: oklch(0.98 0.005 250);
+  --background: oklch(0.2 0.02 40);
+  --foreground: oklch(0.98 0.006 70);
+  --card: oklch(0.24 0.025 40);
+  --card-foreground: oklch(0.98 0.006 70);
+  --primary: oklch(0.78 0.15 45);
+  --primary-foreground: oklch(0.2 0.02 40);
+  --muted: oklch(0.28 0.025 40);
+  --muted-foreground: oklch(0.7 0.03 50);
   --border: oklch(1 0 0 / 0.1);
   --input: oklch(1 0 0 / 0.12);
-  --ring: oklch(0.78 0.15 240);
+  --ring: oklch(0.78 0.15 45);
 }
 
 @layer base {
@@ -113,33 +116,42 @@
   .shadow-orb { box-shadow: var(--shadow-orb); }
   .shadow-soft { box-shadow: var(--shadow-soft); }
 
-  @keyframes breathe {
+  /* Heartbeat — slow, steady pulse */
+  @keyframes heartbeat {
     0%, 100% { transform: scale(1); filter: brightness(1); }
-    50%      { transform: scale(1.04); filter: brightness(1.08); }
+    50%      { transform: scale(1.05); filter: brightness(1.1); }
   }
-  @keyframes breathe-glow {
-    0%, 100% { opacity: 0.7; transform: scale(1); }
-    50%      { opacity: 1;   transform: scale(1.08); }
+  @keyframes heartbeat-glow {
+    0%, 100% { opacity: 0.65; transform: scale(1); }
+    50%      { opacity: 1;    transform: scale(1.08); }
+  }
+  @keyframes orbit-pulse {
+    0%, 100% { transform: scale(1); opacity: var(--op, 0.35); }
+    50%      { transform: scale(1.015); opacity: calc(var(--op, 0.35) + 0.1); }
   }
   @keyframes float-slow {
     0%, 100% { transform: translate(0,0); }
-    50%      { transform: translate(0,-10px); }
+    50%      { transform: translate(0,-8px); }
   }
   @keyframes orbit {
     from { transform: rotate(0deg) translateX(var(--r,160px)) rotate(0deg); }
     to   { transform: rotate(360deg) translateX(var(--r,160px)) rotate(-360deg); }
   }
+  @keyframes orbit-reverse {
+    from { transform: rotate(360deg) translateX(var(--r,160px)) rotate(-360deg); }
+    to   { transform: rotate(0deg)   translateX(var(--r,160px)) rotate(0deg); }
+  }
   @keyframes sparkle {
     0%, 100% { opacity: 0; transform: translate(var(--tx,0), var(--ty,0)) scale(0.6); }
     50%      { opacity: var(--op,0.9); transform: translate(var(--tx,0), var(--ty,0)) scale(1); }
   }
-  @keyframes shimmer-ring {
-    0%   { transform: scale(0.9); opacity: 0;    }
-    20%  { opacity: 0.18; }
-    100% { transform: scale(2.6); opacity: 0;    }
+  @keyframes pulse-wave {
+    0%   { transform: scale(0.95); opacity: 0; }
+    25%  { opacity: 0.22; }
+    100% { transform: scale(2.8); opacity: 0; }
   }
 
-  .animate-breathe       { animation: breathe 6s ease-in-out infinite; }
-  .animate-breathe-glow  { animation: breathe-glow 6s ease-in-out infinite; }
-  .animate-float-slow    { animation: float-slow 8s ease-in-out infinite; }
+  .animate-heartbeat       { animation: heartbeat 3.6s ease-in-out infinite; }
+  .animate-heartbeat-glow  { animation: heartbeat-glow 3.6s ease-in-out infinite; }
+  .animate-float-slow      { animation: float-slow 8s ease-in-out infinite; }
 }
