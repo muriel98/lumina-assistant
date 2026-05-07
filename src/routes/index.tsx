@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ArrowUp, Sparkles } from "lucide-react";
 import { EnergyOrb } from "@/components/EnergyOrb";
 
@@ -17,11 +17,50 @@ export const Route = createFileRoute("/")({
   }),
 });
 
+// How many px of messages until orb reaches final position
+const MAX_SCROLL = 320;
+
+function clamp(val: number, min: number, max: number) {
+  return Math.min(Math.max(val, min), max);
+}
+
 function Index() {
   const [value, setValue] = useState("");
   const [messages, setMessages] = useState<
     { role: "user" | "assistant"; content: string }[]
   >([]);
+  const messagesRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [progress, setProgress] = useState(0); // 0 = idle, 1 = fully transitioned
+
+  const hasMessages = messages.length > 0;
+
+  // Measure messages height and compute progress
+  useEffect(() => {
+    if (!messagesRef.current) return;
+    const h = messagesRef.current.scrollHeight;
+    const p = clamp(h / MAX_SCROLL, 0, 1);
+    setProgress(p);
+  }, [messages]);
+
+  // Autoscroll
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  // Orb scale: 1 → 0.22
+  const orbScale = 1 - progress * (1 - 0.22);
+
+  // Orb vertical position:
+  // idle: centered in viewport (via flex)
+  // transitioning: moves up proportionally
+  // final: fixed at top
+  const isFinal = progress >= 1;
+
+  // During transition, orb moves from center upward
+  // We use a negative translateY that grows with progress
+  // At progress=1 it should be at ~top:40px equivalent
+  const orbTranslateY = isFinal ? 0 : -progress * 38; // in vh
 
   return (
     <main className="relative min-h-screen w-full overflow-hidden flex flex-col">
@@ -60,38 +99,49 @@ function Index() {
         </div>
       </header>
 
-      {/* Center stage */}
-      <section
-        className={`relative z-10 flex flex-col items-center px-6 transition-all duration-500 ${
-          messages.length > 0
-            ? "pt-6 justify-start"
-            : "flex-1 justify-center -mt-8"
-        }`}
-      >
-        {/* Orb — small when chatting, large when idle */}
-        <div
-          className={`transition-all duration-500 ${
-            messages.length > 0 ? "w-16 h-16" : ""
-          }`}
-        >
-          <EnergyOrb scale={messages.length === 0 ? 1 : 0.25} />
+      {/* Orb */}
+      {isFinal ? (
+        // Fixed at top once fully transitioned
+        <div className="fixed top-6 left-0 right-0 z-20 flex justify-center pointer-events-none">
+          <EnergyOrb scale={0.22} />
         </div>
+      ) : (
+        // Centered, moves up as progress grows
+        <div
+          className="relative z-10 flex justify-center"
+          style={{
+            flex: hasMessages ? "0 0 auto" : "1",
+            marginTop: hasMessages ? "0" : "-2rem",
+            transform: `translateY(${orbTranslateY}vh)`,
+            transition: "transform 0.6s ease-out, flex 0.6s ease-out, margin 0.6s ease-out",
+          }}
+        >
+          <EnergyOrb scale={orbScale} />
+        </div>
+      )}
 
-        {/* Welcome text — only shown before any messages */}
-        {messages.length === 0 && (
-          <div className="mt-2 text-center animate-fade-in">
-            <h1 className="text-4xl md:text-5xl font-light tracking-tight text-foreground">
-              Hola.
-            </h1>
-            <p className="mt-3 text-base md:text-lg font-light text-muted-foreground">
-              ¿En qué puedo ayudarte hoy?
-            </p>
-          </div>
-        )}
+      {/* Welcome text */}
+      {!hasMessages && (
+        <div className="relative z-10 text-center -mt-32 animate-fade-in">
+          <h1 className="text-4xl md:text-5xl font-light tracking-tight text-foreground">
+            Hola.
+          </h1>
+          <p className="mt-3 text-base md:text-lg font-light text-muted-foreground">
+            ¿En qué puedo ayudarte hoy?
+          </p>
+        </div>
+      )}
 
-        {/* Messages — shown below the orb when chatting */}
-        {messages.length > 0 && (
-          <div className="w-full max-w-xl space-y-3 px-2 mt-4 overflow-y-auto max-h-[60vh]">
+      {/* Messages */}
+      {hasMessages && (
+        <div
+          className="relative z-10 flex-1 overflow-y-auto px-6 pb-4"
+          style={{ paddingTop: isFinal ? "6rem" : "0.5rem" }}
+        >
+          <div
+            ref={messagesRef}
+            className="mx-auto w-full max-w-xl space-y-3"
+          >
             {messages.map((msg, i) => (
               <div
                 key={i}
@@ -104,25 +154,20 @@ function Index() {
                 {msg.content}
               </div>
             ))}
+            <div ref={messagesEndRef} />
           </div>
-        )}
-      </section>
+        </div>
+      )}
 
       {/* Bottom input */}
       <footer className="relative z-10 px-6 pb-10 mt-auto">
         <form
           onSubmit={async (e) => {
             e.preventDefault();
-
             if (!value.trim()) return;
 
             const userMessage = value;
-
-            setMessages((prev) => [
-              ...prev,
-              { role: "user", content: userMessage },
-            ]);
-
+            setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
             setValue("");
 
             try {
@@ -130,26 +175,16 @@ function Index() {
                 "https://murielgg.app.n8n.cloud/webhook/dba585f4-889e-4a1c-97ec-48eaef2cdae9",
                 {
                   method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
+                  headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({ message: userMessage }),
                 }
               );
-
               const reply = await res.text();
-
+              setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
+            } catch {
               setMessages((prev) => [
                 ...prev,
-                { role: "assistant", content: reply },
-              ]);
-            } catch (error) {
-              setMessages((prev) => [
-                ...prev,
-                {
-                  role: "assistant",
-                  content: "Ha ocurrido un error al responder.",
-                },
+                { role: "assistant", content: "Ha ocurrido un error al responder." },
               ]);
             }
           }}
