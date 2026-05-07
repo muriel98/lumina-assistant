@@ -111,7 +111,7 @@ const [messages, setMessages] = useState<
   setValue("");
 
   try {
-    const res = await fetch("https://murielgg.app.n8n.cloud/mcp-server/http", {
+    const res = await fetch("https://murielgg.app.n8n.cloud/webhook/dba585f4-889e-4a1c-97ec-48eaef2cdae9", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
