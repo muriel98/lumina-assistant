@@ -17,7 +17,6 @@ export const Route = createFileRoute("/")({
   }),
 });
 
-// How many px of messages until orb reaches final position
 const MAX_SCROLL = 320;
 
 function clamp(val: number, min: number, max: number) {
@@ -29,48 +28,33 @@ function Index() {
   const [messages, setMessages] = useState<
     { role: "user" | "assistant"; content: string }[]
   >([]);
-  const messagesRef = useRef<HTMLDivElement>(null);
+  const messagesInnerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [progress, setProgress] = useState(0); // 0 = idle, 1 = fully transitioned
+  const [progress, setProgress] = useState(0);
 
   const hasMessages = messages.length > 0;
 
-  // Measure messages height and compute progress
   useEffect(() => {
-    if (!messagesRef.current) return;
-    const h = messagesRef.current.scrollHeight;
+    if (!messagesInnerRef.current) return;
+    const h = messagesInnerRef.current.scrollHeight;
     const p = clamp(h / MAX_SCROLL, 0, 1);
     setProgress(p);
-  }, [messages]);
-
-  // Autoscroll
-  useEffect(() => {
+    // Scroll to bottom
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Orb scale: 1 → 0.22
   const orbScale = 1 - progress * (1 - 0.22);
-
-  // Orb vertical position:
-  // idle: centered in viewport (via flex)
-  // transitioning: moves up proportionally
-  // final: fixed at top
   const isFinal = progress >= 1;
-
-  // During transition, orb moves from center upward
-  // We use a negative translateY that grows with progress
-  // At progress=1 it should be at ~top:40px equivalent
-  const orbTranslateY = isFinal ? 0 : -progress * 38; // in vh
+  const orbTranslateY = isFinal ? 0 : -progress * 38;
 
   return (
-    <main className="relative min-h-screen w-full overflow-hidden flex flex-col">
+    <main className="relative h-screen w-full overflow-hidden flex flex-col">
       {/* Ambient background accents */}
       <div
         aria-hidden
         className="pointer-events-none absolute -top-40 -left-40 h-[480px] w-[480px] rounded-full opacity-60"
         style={{
-          background:
-            "radial-gradient(circle, oklch(0.92 0.1 50 / 0.5), transparent 70%)",
+          background: "radial-gradient(circle, oklch(0.92 0.1 50 / 0.5), transparent 70%)",
           filter: "blur(60px)",
         }}
       />
@@ -78,14 +62,13 @@ function Index() {
         aria-hidden
         className="pointer-events-none absolute -bottom-40 -right-40 h-[520px] w-[520px] rounded-full opacity-50"
         style={{
-          background:
-            "radial-gradient(circle, oklch(0.94 0.08 35 / 0.5), transparent 70%)",
+          background: "radial-gradient(circle, oklch(0.94 0.08 35 / 0.5), transparent 70%)",
           filter: "blur(60px)",
         }}
       />
 
       {/* Top bar */}
-      <header className="relative z-10 flex items-center justify-between px-8 py-6">
+      <header className="relative z-10 flex-shrink-0 flex items-center justify-between px-8 py-6">
         <div className="flex items-center gap-2 text-sm tracking-wide text-foreground/80">
           <Sparkles className="h-4 w-4 text-primary" strokeWidth={1.5} />
           <span className="font-medium">Aura</span>
@@ -99,21 +82,19 @@ function Index() {
         </div>
       </header>
 
-      {/* Orb */}
+      {/* Orb — fixed at top once final, otherwise floats in center moving up */}
       {isFinal ? (
-        // Fixed at top once fully transitioned
         <div className="fixed top-6 left-0 right-0 z-20 flex justify-center pointer-events-none">
           <EnergyOrb scale={0.22} />
         </div>
       ) : (
-        // Centered, moves up as progress grows
         <div
-          className="relative z-10 flex justify-center"
+          className="relative z-10 flex-shrink-0 flex justify-center"
           style={{
-            flex: hasMessages ? "0 0 auto" : "1",
-            marginTop: hasMessages ? "0" : "-2rem",
+            marginTop: hasMessages ? "0" : "auto",
+            marginBottom: hasMessages ? "0" : "auto",
             transform: `translateY(${orbTranslateY}vh)`,
-            transition: "transform 0.6s ease-out, flex 0.6s ease-out, margin 0.6s ease-out",
+            transition: "transform 0.6s ease-out",
           }}
         >
           <EnergyOrb scale={orbScale} />
@@ -122,7 +103,10 @@ function Index() {
 
       {/* Welcome text */}
       {!hasMessages && (
-        <div className="relative z-10 text-center -mt-32 animate-fade-in">
+        <div
+          className="relative z-10 flex-shrink-0 text-center animate-fade-in"
+          style={{ marginTop: "-8rem" }}
+        >
           <h1 className="text-4xl md:text-5xl font-light tracking-tight text-foreground">
             Hola.
           </h1>
@@ -132,35 +116,31 @@ function Index() {
         </div>
       )}
 
-      {/* Messages */}
+      {/* Messages — flex-1 so it fills space, overflow-y-auto for scroll, justify-end to pin to bottom */}
       {hasMessages && (
-        <div
-          className="relative z-10 flex-1 overflow-y-auto px-6 pb-4"
-          style={{ paddingTop: isFinal ? "6rem" : "0.5rem" }}
-        >
-          <div
-            ref={messagesRef}
-            className="mx-auto w-full max-w-xl space-y-3"
-          >
-            {messages.map((msg, i) => (
-              <div
-                key={i}
-                className={`text-sm md:text-base px-4 py-2 rounded-2xl max-w-[80%] ${
-                  msg.role === "user"
-                    ? "ml-auto bg-primary/10 text-foreground"
-                    : "mr-auto bg-muted text-muted-foreground"
-                }`}
-              >
-                {msg.content}
-              </div>
-            ))}
-            <div ref={messagesEndRef} />
+        <div className="relative z-10 flex-1 overflow-y-auto px-6">
+          <div className="flex flex-col justify-end min-h-full pb-4" style={{ paddingTop: isFinal ? "5rem" : "0.5rem" }}>
+            <div ref={messagesInnerRef} className="mx-auto w-full max-w-xl space-y-3">
+              {messages.map((msg, i) => (
+                <div
+                  key={i}
+                  className={`text-sm md:text-base px-4 py-2 rounded-2xl max-w-[80%] ${
+                    msg.role === "user"
+                      ? "ml-auto bg-primary/10 text-foreground"
+                      : "mr-auto bg-muted text-muted-foreground"
+                  }`}
+                >
+                  {msg.content}
+                </div>
+              ))}
+              <div ref={messagesEndRef} />
+            </div>
           </div>
         </div>
       )}
 
       {/* Bottom input */}
-      <footer className="relative z-10 px-6 pb-10 mt-auto">
+      <footer className="relative z-10 flex-shrink-0 px-6 pb-10 pt-2">
         <form
           onSubmit={async (e) => {
             e.preventDefault();
