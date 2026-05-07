@@ -20,6 +20,10 @@ export const Route = createFileRoute("/")({
 function Index() {
   const [value, setValue] = useState("");
 
+const [messages, setMessages] = useState<
+    { role: "user" | "assistant"; content: string }[]
+  >([]);
+
   return (
     <main className="relative min-h-screen w-full overflow-hidden flex flex-col">
       {/* Ambient background accents */}
@@ -73,11 +77,65 @@ function Index() {
 
       {/* Bottom input */}
       <footer className="relative z-10 px-6 pb-10">
+        
+<div className="mx-auto mb-6 w-full max-w-xl space-y-3 px-2">
+  {messages.map((msg, i) => (
+    <div
+      key={i}
+      className={`text-sm md:text-base px-4 py-2 rounded-2xl max-w-[80%] ${
+        msg.role === "user"
+          ? "ml-auto bg-primary/10 text-foreground"
+          : "mr-auto bg-muted text-muted-foreground"
+      }`}
+    >
+      {msg.content}
+    </div>
+  ))}
+</div>
+
         <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            setValue("");
-          }}
+         onSubmit={async (e) => {
+  e.preventDefault();
+
+  if (!value.trim()) return;
+
+  const userMessage = value;
+
+  // Añadir mensaje del usuario
+  setMessages((prev) => [
+    ...prev,
+    { role: "user", content: userMessage },
+  ]);
+
+  // Limpiar input
+  setValue("");
+
+  try {
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ message: userMessage }),
+    });
+
+    const data = await res.json();
+
+    // Añadir respuesta de la IA
+    setMessages((prev) => [
+      ...prev,
+      { role: "assistant", content: data.reply },
+    ]);
+  } catch (error) {
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "assistant",
+        content: "Ha ocurrido un error al responder.",
+      },
+    ]);
+  }
+}}
           className="mx-auto flex w-full max-w-xl items-center gap-2 rounded-full bg-card/70 px-5 py-3 shadow-soft backdrop-blur-xl ring-1 ring-border transition focus-within:ring-2 focus-within:ring-primary/40"
         >
           <input
