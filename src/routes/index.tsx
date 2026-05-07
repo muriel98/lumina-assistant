@@ -94,7 +94,7 @@ function Index() {
             marginTop: hasMessages ? "0" : "auto",
             marginBottom: hasMessages ? "0" : "auto",
             transform: `translateY(${orbTranslateY}vh)`,
-            transition: "transform 0.6s ease-out",
+            transition: "transform 1.2s cubic-bezier(0.16, 1, 0.3, 1)",
           }}
         >
           <EnergyOrb scale={orbScale} />
