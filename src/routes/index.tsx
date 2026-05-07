@@ -40,7 +40,7 @@ function Index() {
     const p = clamp(h / MAX_SCROLL, 0, 1);
     setProgress(p);
     // Scroll to bottom
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    //messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   const orbScale = 1 - progress * (1 - 0.22);
