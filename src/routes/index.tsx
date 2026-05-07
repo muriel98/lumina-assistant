@@ -112,20 +112,19 @@ const [messages, setMessages] = useState<
 
   try {
     const res = await fetch("https://murielgg.app.n8n.cloud/webhook/dba585f4-889e-4a1c-97ec-48eaef2cdae9", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ message: userMessage }),
-    });
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({ message: userMessage }),
+});
 
-    const data = await res.json();
+const reply = await res.text();
 
-    // Añadir respuesta de la IA
-    setMessages((prev) => [
-      ...prev,
-      { role: "assistant", content: data},
-    ]);
+setMessages((prev) => [
+  ...prev,
+  { role: "assistant", content: reply },
+]);
   } catch (error) {
     setMessages((prev) => [
       ...prev,
