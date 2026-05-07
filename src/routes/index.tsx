@@ -124,7 +124,7 @@ const [messages, setMessages] = useState<
     // Añadir respuesta de la IA
     setMessages((prev) => [
       ...prev,
-      { role: "assistant", content: data.reply },
+      { role: "assistant", content: data},
     ]);
   } catch (error) {
     setMessages((prev) => [
