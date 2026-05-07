@@ -28,7 +28,7 @@ function Index() {
         className="pointer-events-none absolute -top-40 -left-40 h-[480px] w-[480px] rounded-full opacity-60"
         style={{
           background:
-            "radial-gradient(circle, oklch(0.9 0.08 240 / 0.5), transparent 70%)",
+            "radial-gradient(circle, oklch(0.92 0.1 50 / 0.5), transparent 70%)",
           filter: "blur(60px)",
         }}
       />
@@ -37,7 +37,7 @@ function Index() {
         className="pointer-events-none absolute -bottom-40 -right-40 h-[520px] w-[520px] rounded-full opacity-50"
         style={{
           background:
-            "radial-gradient(circle, oklch(0.92 0.06 220 / 0.5), transparent 70%)",
+            "radial-gradient(circle, oklch(0.94 0.08 35 / 0.5), transparent 70%)",
           filter: "blur(60px)",
         }}
       />
@@ -91,7 +91,7 @@ function Index() {
             type="submit"
             disabled={!value.trim()}
             aria-label="Enviar"
-            className="grid h-9 w-9 place-items-center rounded-full bg-primary text-primary-foreground shadow-[0_0_20px_oklch(0.78_0.15_240/0.5)] transition hover:scale-105 disabled:opacity-40 disabled:hover:scale-100"
+            className="grid h-9 w-9 place-items-center rounded-full bg-primary text-primary-foreground shadow-[0_0_20px_oklch(0.78_0.16_40/0.5)] transition hover:scale-105 disabled:opacity-40 disabled:hover:scale-100"
           >
             <ArrowUp className="h-4 w-4" strokeWidth={2} />
           </button>
