@@ -5,6 +5,16 @@ import { EnergyOrb } from "@/components/EnergyOrb";
 
 export const Route = createFileRoute("/")({
   component: Index,
+  head: () => ({
+    meta: [
+      { title: "Aura — Asistente inteligente" },
+      {
+        name: "description",
+        content:
+          "Aura es un asistente virtual de próxima generación.",
+      },
+    ],
+  }),
 });
 
 function clamp(val: number, min: number, max: number) {
@@ -18,9 +28,12 @@ function Index() {
   const [messages, setMessages] = useState<
     { role: "user" | "assistant"; content: string }[]
   >([]);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const hasMessages = messages.length > 0;
+
   const progress = clamp(messages.length / SHRINK_AFTER, 0, 1);
   const orbScale = 1 - progress * (1 - 0.32);
 
@@ -31,32 +44,53 @@ function Index() {
   return (
     <main className="relative h-screen w-full overflow-hidden flex flex-col">
 
-      {/* HEADER */}
-      <header className="relative z-20 flex items-center justify-between px-8 py-6">
+      {/* Background */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-40 -left-40 h-[480px] w-[480px] rounded-full opacity-60"
+        style={{
+          background:
+            "radial-gradient(circle, oklch(0.92 0.1 50 / 0.5), transparent 70%)",
+          filter: "blur(60px)",
+        }}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -bottom-40 -right-40 h-[520px] w-[520px] rounded-full opacity-50"
+        style={{
+          background:
+            "radial-gradient(circle, oklch(0.94 0.08 35 / 0.5), transparent 70%)",
+          filter: "blur(60px)",
+        }}
+      />
+
+      {/* Header */}
+      <header className="relative z-20 flex-shrink-0 flex items-center justify-between px-8 py-6">
         <div className="flex items-center gap-2 text-sm text-foreground/80">
           <Sparkles className="h-4 w-4 text-primary" />
-          Aura
+          <span className="font-medium">Aura</span>
         </div>
-        <span className="text-xs text-muted-foreground">En línea</span>
+        <div className="text-xs text-muted-foreground">En línea</div>
       </header>
 
       {/* ORB */}
       <div
+        aria-hidden
         className="pointer-events-none absolute left-1/2 z-10 flex justify-center"
         style={{
-          top: `${58 - progress * 40}%`, // 👈 ligeramente más arriba que antes
+          top: `${60 - progress * 42}%`,
           transform: "translate(-50%, -50%)",
-          transition: "top 1.2s cubic-bezier(0.16, 1, 0.3, 1)",
+          transition:
+            "top 1.2s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1)",
         }}
       >
         <EnergyOrb scale={orbScale} />
       </div>
 
-      {/* CONTENIDO INICIAL */}
+      {/* TEXTO INICIAL (DEBAJO DEL ORB) */}
       {!hasMessages && (
-        <div className="flex-1 flex flex-col items-center justify-end text-center pb-40">
-          {/* 👇 separación real respecto al orb */}
-          <div className="mt-40">
+        <div className="relative z-10 flex-1 flex flex-col items-center justify-end pb-40 text-center pointer-events-none">
+          <div className="mt-48"> {/* 👈 CLAVE: baja el texto */}
             <h1 className="text-4xl md:text-5xl font-light text-foreground">
               Hola.
             </h1>
@@ -69,16 +103,28 @@ function Index() {
 
       {/* MENSAJES */}
       {hasMessages && (
-        <div className="flex-1 overflow-y-auto px-6">
-          <div className="flex flex-col justify-end min-h-full pb-6">
-            <div className="mx-auto max-w-xl space-y-3 w-full">
+        <div
+          ref={scrollRef}
+          className="relative z-10 flex-1 overflow-y-auto px-6"
+          style={{
+            WebkitMaskImage:
+              "linear-gradient(to bottom, transparent 0%, transparent 30%, black 55%, black 100%)",
+            maskImage:
+              "linear-gradient(to bottom, transparent 0%, transparent 30%, black 55%, black 100%)",
+          }}
+        >
+          <div
+            className="flex flex-col justify-end min-h-full pb-4"
+            style={{ paddingTop: `${12 + progress * 16}rem` }}
+          >
+            <div className="mx-auto w-full max-w-xl space-y-3">
               {messages.map((msg, i) => (
                 <div
                   key={i}
-                  className={`px-4 py-2 rounded-2xl max-w-[80%] ${
+                  className={`text-sm md:text-base px-4 py-2 rounded-2xl max-w-[80%] animate-fade-in ${
                     msg.role === "user"
-                      ? "ml-auto bg-primary/10"
-                      : "mr-auto bg-muted"
+                      ? "ml-auto bg-primary/10 text-foreground"
+                      : "mr-auto bg-muted text-muted-foreground"
                   }`}
                 >
                   {msg.content}
@@ -91,24 +137,77 @@ function Index() {
       )}
 
       {/* INPUT */}
-      <footer className="px-6 pb-24 pt-4"> {/* 👈 MÁS ABAJO */}
-        <form className="mx-auto max-w-xl flex items-center gap-2 rounded-full bg-card/70 px-5 py-3 backdrop-blur-xl ring-1 ring-border">
+      <footer className="relative z-10 flex-shrink-0 px-6 pb-24 pt-6">
+        <form
+          onSubmit={async (e) => {
+            e.preventDefault();
+            if (!value.trim()) return;
+
+            const userMessage = value;
+
+            setMessages((prev) => [
+              ...prev,
+              { role: "user", content: userMessage },
+            ]);
+
+            setValue("");
+
+            try {
+              const res = await fetch(
+                "https://murielgg.app.n8n.cloud/webhook/dba585f4-889e-4a1c-97ec-48eaef2cdae9",
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ message: userMessage }),
+                }
+              );
+
+              const reply = await res.text();
+
+              setMessages((prev) => [
+                ...prev,
+                { role: "assistant", content: reply },
+              ]);
+            } catch {
+              setMessages((prev) => [
+                ...prev,
+                {
+                  role: "assistant",
+                  content: "Ha ocurrido un error al responder.",
+                },
+              ]);
+            }
+          }}
+          className="mx-auto flex w-full max-w-xl items-center gap-2 rounded-full bg-card/70 px-5 py-3 shadow-soft backdrop-blur-xl ring-1 ring-border transition focus-within:ring-2 focus-within:ring-primary/40"
+        >
           <input
             value={value}
             onChange={(e) => setValue(e.target.value)}
             placeholder="Pregúntale a Aura…"
-            className="flex-1 bg-transparent outline-none"
+            className="flex-1 bg-transparent text-sm md:text-base font-light text-foreground placeholder:text-muted-foreground/70 outline-none"
           />
-          <button type="button" className="h-9 w-9 rounded-full bg-secondary flex items-center justify-center">
+
+          <button
+            type="button"
+            className="grid h-9 w-9 place-items-center rounded-full bg-secondary"
+          >
             <Mic className="h-4 w-4" />
           </button>
-          <button type="submit" className="h-9 w-9 rounded-full bg-primary flex items-center justify-center">
+
+          <button
+            type="submit"
+            disabled={!value.trim()}
+            className="grid h-9 w-9 place-items-center rounded-full bg-primary text-primary-foreground"
+          >
             <ArrowUp className="h-4 w-4" />
           </button>
         </form>
+
+        <p className="mt-3 text-center text-[11px] text-muted-foreground/70">
+          Aura escucha en silencio · respuestas claras
+        </p>
       </footer>
 
     </main>
   );
 }
-``
