@@ -114,10 +114,18 @@ function Index() {
     recognition.onresult = (event: SpeechRecognitionEvent) => {
       const transcript = event.results[0][0].transcript;
       setIsListening(false);
-      sendMessage(transcript);
+      if (!transcript.trim()) {
+    sendMessage("El usuario no ha dicho nada, responde con algo como: ¿Podrías repetirlo?");
+  } else {
+    sendMessage(transcript);
+  }
     };
 
-    recognition.onerror = () => setIsListening(false);
+    recognition.onerror = () => {
+      setIsListening(false);
+      sendMessage("El usuario no ha dicho nada, responde con algo como: ¿Podrías repetirlo?");
+    }
+      
     recognition.onend = () => setIsListening(false);
 
     recognitionRef.current = recognition;
