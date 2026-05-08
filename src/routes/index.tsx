@@ -69,7 +69,7 @@ function Index() {
 
       {/* Top bar */}
       <header className="relative z-20 flex-shrink-0 flex items-center justify-between px-8 py-6">
-        <div className="flex-1 flex flex-col justify-end items-center pb-24">
+        <div className="flex-1 flex flex-col justify-end items-center pb-50">
         <div className="flex items-center gap-2 text-sm tracking-wide text-foreground/80">
           <Sparkles className="h-4 w-4 text-primary" strokeWidth={1.5} />
           <span className="font-medium">Aura</span>
