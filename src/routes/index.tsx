@@ -45,6 +45,7 @@ function Index() {
   }, [messages]);
 
   return (
+
     <main className="relative h-screen w-full overflow-hidden flex flex-col justify-center">
       {/* Ambient background accents */}
       <div
@@ -68,6 +69,7 @@ function Index() {
 
       {/* Top bar */}
       <header className="relative z-20 flex-shrink-0 flex items-center justify-between px-8 py-6">
+        <div className="flex-1 flex flex-col justify-end items-center pb-24">
         <div className="flex items-center gap-2 text-sm tracking-wide text-foreground/80">
           <Sparkles className="h-4 w-4 text-primary" strokeWidth={1.5} />
           <span className="font-medium">Aura</span>
@@ -78,10 +80,11 @@ function Index() {
             <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
           </span>
           En línea
-        </div>
+        </div></div>
       </header>
 
       {/* Orb stage — animates from centered to small-fixed-on-top */}
+      <div className="flex-1 flex flex-col justify-end items-center pb-24">
       <div
         aria-hidden
         className="pointer-events-none absolute left-1/2 z-10 flex justify-center"
@@ -100,7 +103,7 @@ function Index() {
       {!hasMessages && (
         <div
           className="relative z-10 flex-shrink-0 text-center animate-fade-in pointer-events-none"
-          style={{ marginTop: "12rem", marginBottom: "12rem" }}
+          style={{ marginTop: "auto", marginBottom: "12rem" }}
         >
           <h1 className="text-4xl md:text-5xl font-light tracking-tight text-foreground">
             Hola.
@@ -110,7 +113,7 @@ function Index() {
           </p>
         </div>
       )}
-
+      </div>
       {/* Messages — scroll area, bottom-anchored, fade-out near top */}
       {hasMessages && (
         <div
