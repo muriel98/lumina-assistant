@@ -78,7 +78,7 @@ function Index() {
         aria-hidden
         className="pointer-events-none absolute left-1/2 z-10 flex justify-center"
         style={{
-          top: `${60 - progress * 42}%`,
+         top: `${68 - progress * 45}%`,
           transform: "translate(-50%, -50%)",
           transition:
             "top 1.2s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1)",
@@ -137,7 +137,7 @@ function Index() {
       )}
 
       {/* INPUT */}
-      <footer className="relative z-10 flex-shrink-0 px-6 pb-24 pt-6">
+      <footer className="relative z-10 flex-shrink-0 px-6 pb-32 pt-6">
         <form
           onSubmit={async (e) => {
             e.preventDefault();
