@@ -45,7 +45,7 @@ function Index() {
   }, [messages]);
 
   return (
-    <main className="relative h-screen w-full overflow-hidden flex flex-col">
+    <main className="relative h-screen w-full overflow-hidden flex flex-col justify-center">
       {/* Ambient background accents */}
       <div
         aria-hidden
@@ -100,7 +100,7 @@ function Index() {
       {!hasMessages && (
         <div
           className="relative z-10 flex-shrink-0 text-center animate-fade-in pointer-events-none"
-          style={{ marginTop: "auto", marginBottom: "12rem" }}
+          style={{ marginTop: "12rem", marginBottom: "12rem" }}
         >
           <h1 className="text-4xl md:text-5xl font-light tracking-tight text-foreground">
             Hola.
@@ -148,7 +148,7 @@ function Index() {
       )}
 
       {/* Bottom input */}
-      <footer className="relative z-20 flex-shrink-0 px-6 pb-10 pt-2">
+      <footer className="relative z-10 flex-shrink-0 px-6 pb-16 pt-4">
         <form
           onSubmit={async (e) => {
             e.preventDefault();
