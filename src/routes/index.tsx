@@ -74,17 +74,34 @@ function Index() {
     }
   };
 
-  const speakText = (text: string) => {
-    if (!window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "es-ES";
-    utterance.rate = 1;
-    utterance.pitch = 1;
-    utterance.onstart = () => setIsSpeaking(true);
-    utterance.onend = () => setIsSpeaking(false);
-    window.speechSynthesis.speak(utterance);
+const speakText = (text: string) => {
+  if (!window.speechSynthesis) return;
+
+  window.speechSynthesis.cancel();
+
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = "es-ES";
+
+  const loadVoicesAndSpeak = () => {
+    const voices = speechSynthesis.getVoices();
+    const spanish = voices.find(v => v.lang.startsWith("es"));
+
+    if (spanish) utterance.voice = spanish;
+
+    speechSynthesis.speak(utterance);
   };
+
+  // ✅ clave: esperar a que carguen las voces
+  if (speechSynthesis.getVoices().length === 0) {
+    speechSynthesis.onvoiceschanged = loadVoicesAndSpeak;
+  } else {
+    loadVoicesAndSpeak();
+  }
+
+  utterance.onstart = () => setIsSpeaking(true);
+  utterance.onend = () => setIsSpeaking(false);
+};
+
 
   const toggleListening = () => {
     if (isListening) {
