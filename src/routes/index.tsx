@@ -30,6 +30,7 @@ function Index() {
   >([]);
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [voiceMode, setVoiceMode] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -62,8 +63,9 @@ function Index() {
 
       setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
 
-      // Speak the reply
-      speakText(reply);
+      if (voiceMode) {
+  speakText(reply);
+}
     } catch {
       setMessages((prev) => [
         ...prev,
@@ -104,7 +106,10 @@ function Index() {
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
 
-    recognition.onstart = () => setIsListening(true);
+    recognition.onstart = () =>{
+      setIsListening(true);
+      setVoiceMode(true);
+    }
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {
       const transcript = event.results[0][0].transcript;
@@ -219,6 +224,7 @@ function Index() {
             if (!value.trim()) return;
             const userMessage = value;
             setValue("");
+            setVoiceMode(false);
             await sendMessage(userMessage);
           }}
           className="mx-auto flex w-full max-w-xl items-center gap-2 rounded-full bg-card/70 px-5 py-3 shadow-soft backdrop-blur-xl ring-1 ring-border transition focus-within:ring-2 focus-within:ring-primary/40"
