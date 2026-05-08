@@ -137,7 +137,7 @@ function Index() {
       )}
 
       {/* INPUT */}
-      <footer className="relative z-10 flex-shrink-0 px-6 pb- -5 pt-6">
+      <footer className="relative z-10 flex-shrink-0 px-6 pb- -20 pt-6">
         <form
           onSubmit={async (e) => {
             e.preventDefault();
