@@ -63,9 +63,12 @@ function Index() {
 
       setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
 
-      if (voiceMode) {
+    
+if (voiceMode) {
   speakText(reply);
+  setVoiceMode(false); // 👈 clave
 }
+
     } catch {
       setMessages((prev) => [
         ...prev,
