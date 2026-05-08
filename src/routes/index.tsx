@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect, useRef } from "react";
-import { ArrowUp, Sparkles } from "lucide-react";
+import { ArrowUp, Sparkles, Mic } from "lucide-react";
 import { EnergyOrb } from "@/components/EnergyOrb";
 
 export const Route = createFileRoute("/")({
@@ -17,35 +17,32 @@ export const Route = createFileRoute("/")({
   }),
 });
 
-const MAX_SCROLL = 600;
-
 function clamp(val: number, min: number, max: number) {
   return Math.min(Math.max(val, min), max);
 }
+
+// Number of messages required for the orb to reach its smallest, top-fixed state
+const SHRINK_AFTER = 6;
 
 function Index() {
   const [value, setValue] = useState("");
   const [messages, setMessages] = useState<
     { role: "user" | "assistant"; content: string }[]
   >([]);
-  const messagesInnerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [progress, setProgress] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const hasMessages = messages.length > 0;
 
-  useEffect(() => {
-    if (!messagesInnerRef.current) return;
-    const h = messagesInnerRef.current.scrollHeight;
-    const p = clamp(h / MAX_SCROLL, 0, 1);
-    setProgress(p);
-    // Scroll to bottom
-    //messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  // Progress 0 → 1 as conversation grows
+  const progress = clamp(messages.length / SHRINK_AFTER, 0, 1);
 
-  const orbScale = 1 - progress * (1 - 0.3);
-  const isFinal = progress >= 1;
-  const orbTranslateY = 0;
+  // Orb scales from 1 → 0.32 as progress grows
+  const orbScale = 1 - progress * (1 - 0.32);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   return (
     <main className="relative h-screen w-full overflow-hidden flex flex-col">
@@ -54,7 +51,8 @@ function Index() {
         aria-hidden
         className="pointer-events-none absolute -top-40 -left-40 h-[480px] w-[480px] rounded-full opacity-60"
         style={{
-          background: "radial-gradient(circle, oklch(0.92 0.1 50 / 0.5), transparent 70%)",
+          background:
+            "radial-gradient(circle, oklch(0.92 0.1 50 / 0.5), transparent 70%)",
           filter: "blur(60px)",
         }}
       />
@@ -62,13 +60,14 @@ function Index() {
         aria-hidden
         className="pointer-events-none absolute -bottom-40 -right-40 h-[520px] w-[520px] rounded-full opacity-50"
         style={{
-          background: "radial-gradient(circle, oklch(0.94 0.08 35 / 0.5), transparent 70%)",
+          background:
+            "radial-gradient(circle, oklch(0.94 0.08 35 / 0.5), transparent 70%)",
           filter: "blur(60px)",
         }}
       />
 
       {/* Top bar */}
-      <header className="relative z-10 flex-shrink-0 flex items-center justify-between px-8 py-6">
+      <header className="relative z-20 flex-shrink-0 flex items-center justify-between px-8 py-6">
         <div className="flex items-center gap-2 text-sm tracking-wide text-foreground/80">
           <Sparkles className="h-4 w-4 text-primary" strokeWidth={1.5} />
           <span className="font-medium">Aura</span>
@@ -82,22 +81,26 @@ function Index() {
         </div>
       </header>
 
-
+      {/* Orb stage — animates from centered to small-fixed-on-top */}
       <div
-  className="relative z-10 flex-shrink-0 flex justify-center"
-  style={{
-    transition: "transform 1.2s cubic-bezier(0.16, 1, 0.3, 1)",
-  }}
->
-  <EnergyOrb scale={orbScale} />
-</div>
-      )}
+        aria-hidden
+        className="pointer-events-none absolute left-1/2 z-10 flex justify-center"
+        style={{
+          // top moves from ~38% (centered area) to ~12% (pinned near header)
+          top: `${38 - progress * 26}%`,
+          transform: `translate(-50%, -50%)`,
+          transition:
+            "top 1.2s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1)",
+        }}
+      >
+        <EnergyOrb scale={orbScale} />
+      </div>
 
-      {/* Welcome text */}
+      {/* Welcome text — only when no conversation */}
       {!hasMessages && (
         <div
-          className="relative z-10 flex-shrink-0 text-center animate-fade-in"
-          style={{ marginTop: "-8rem" }}
+          className="relative z-10 flex-shrink-0 text-center animate-fade-in pointer-events-none"
+          style={{ marginTop: "auto", marginBottom: "12rem" }}
         >
           <h1 className="text-4xl md:text-5xl font-light tracking-tight text-foreground">
             Hola.
@@ -108,15 +111,28 @@ function Index() {
         </div>
       )}
 
-      {/* Messages — flex-1 so it fills space, overflow-y-auto for scroll, justify-end to pin to bottom */}
+      {/* Messages — scroll area, bottom-anchored, fade-out near top */}
       {hasMessages && (
-        <div className="relative z-10 flex-1 overflow-y-auto px-6">
-          <div className="flex flex-col justify-end min-h-full pb-4" style={{ paddingTop: isFinal ? "5rem" : "0.5rem" }}>
-            <div ref={messagesInnerRef} className="mx-auto w-full max-w-xl space-y-3">
+        <div
+          ref={scrollRef}
+          className="relative z-10 flex-1 overflow-y-auto px-6"
+          style={{
+            // Mask: fully transparent at top → opaque ~40% down. Stronger as orb shrinks/rises.
+            WebkitMaskImage:
+              "linear-gradient(to bottom, transparent 0%, transparent 18%, black 42%, black 100%)",
+            maskImage:
+              "linear-gradient(to bottom, transparent 0%, transparent 18%, black 42%, black 100%)",
+          }}
+        >
+          <div
+            className="flex flex-col justify-end min-h-full pb-4"
+            style={{ paddingTop: `${10 + progress * 16}rem` }}
+          >
+            <div className="mx-auto w-full max-w-xl space-y-3">
               {messages.map((msg, i) => (
                 <div
                   key={i}
-                  className={`text-sm md:text-base px-4 py-2 rounded-2xl max-w-[80%] ${
+                  className={`text-sm md:text-base px-4 py-2 rounded-2xl max-w-[80%] animate-fade-in ${
                     msg.role === "user"
                       ? "ml-auto bg-primary/10 text-foreground"
                       : "mr-auto bg-muted text-muted-foreground"
@@ -132,14 +148,17 @@ function Index() {
       )}
 
       {/* Bottom input */}
-      <footer className="relative z-10 flex-shrink-0 px-6 pb-10 pt-2">
+      <footer className="relative z-20 flex-shrink-0 px-6 pb-10 pt-2">
         <form
           onSubmit={async (e) => {
             e.preventDefault();
             if (!value.trim()) return;
 
             const userMessage = value;
-            setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
+            setMessages((prev) => [
+              ...prev,
+              { role: "user", content: userMessage },
+            ]);
             setValue("");
 
             try {
@@ -149,14 +168,20 @@ function Index() {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({ message: userMessage }),
-                }
+                },
               );
               const reply = await res.text();
-              setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
+              setMessages((prev) => [
+                ...prev,
+                { role: "assistant", content: reply },
+              ]);
             } catch {
               setMessages((prev) => [
                 ...prev,
-                { role: "assistant", content: "Ha ocurrido un error al responder." },
+                {
+                  role: "assistant",
+                  content: "Ha ocurrido un error al responder.",
+                },
               ]);
             }
           }}
@@ -169,6 +194,14 @@ function Index() {
             className="flex-1 bg-transparent text-sm md:text-base font-light text-foreground placeholder:text-muted-foreground/70 outline-none"
             aria-label="Mensaje para Aura"
           />
+          <button
+            type="button"
+            aria-label="Iniciar conversación de voz"
+            title="Iniciar conversación de voz"
+            className="grid h-9 w-9 place-items-center rounded-full bg-secondary text-secondary-foreground ring-1 ring-border transition hover:scale-105 hover:bg-accent"
+          >
+            <Mic className="h-4 w-4" strokeWidth={1.75} />
+          </button>
           <button
             type="submit"
             disabled={!value.trim()}
@@ -185,4 +218,3 @@ function Index() {
     </main>
   );
 }
-
