@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect, useRef } from "react";
-import { ArrowUp, Sparkles, Mic } from "lucide-react";
+import { ArrowUp, Sparkles, Mic, MicOff } from "lucide-react";
 import { EnergyOrb } from "@/components/EnergyOrb";
 
 export const Route = createFileRoute("/")({
@@ -28,18 +28,96 @@ function Index() {
   const [messages, setMessages] = useState<
     { role: "user" | "assistant"; content: string }[]
   >([]);
+  const [isListening, setIsListening] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
 
   const hasMessages = messages.length > 0;
-
   const progress = clamp(messages.length / SHRINK_AFTER, 0, 1);
   const orbScale = 1 - progress * (1 - 0.32);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  const sendMessage = async (text: string) => {
+    if (!text.trim()) return;
+
+    setMessages((prev) => [...prev, { role: "user", content: text }]);
+
+    try {
+      const res = await fetch(
+        "https://murielgg.app.n8n.cloud/webhook/dba585f4-889e-4a1c-97ec-48eaef2cdae9",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: text }),
+        }
+      );
+
+      const reply = await res.text();
+
+      setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
+
+      // Speak the reply
+      speakText(reply);
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: "Ha ocurrido un error al responder." },
+      ]);
+    }
+  };
+
+  const speakText = (text: string) => {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "es-ES";
+    utterance.rate = 1;
+    utterance.pitch = 1;
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const toggleListening = () => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+      return;
+    }
+
+    const SpeechRecognition =
+      window.SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      alert("Tu navegador no soporta reconocimiento de voz. Usa Chrome.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = "es-ES";
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => setIsListening(true);
+
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
+      const transcript = event.results[0][0].transcript;
+      setIsListening(false);
+      sendMessage(transcript);
+    };
+
+    recognition.onerror = () => setIsListening(false);
+    recognition.onend = () => setIsListening(false);
+
+    recognitionRef.current = recognition;
+    recognition.start();
+  };
 
   return (
     <main className="relative h-screen w-full overflow-hidden flex flex-col">
@@ -49,8 +127,7 @@ function Index() {
         aria-hidden
         className="pointer-events-none absolute -top-40 -left-40 h-[480px] w-[480px] rounded-full opacity-60"
         style={{
-          background:
-            "radial-gradient(circle, oklch(0.92 0.1 50 / 0.5), transparent 70%)",
+          background: "radial-gradient(circle, oklch(0.92 0.1 50 / 0.5), transparent 70%)",
           filter: "blur(60px)",
         }}
       />
@@ -58,8 +135,7 @@ function Index() {
         aria-hidden
         className="pointer-events-none absolute -bottom-40 -right-40 h-[520px] w-[520px] rounded-full opacity-50"
         style={{
-          background:
-            "radial-gradient(circle, oklch(0.94 0.08 35 / 0.5), transparent 70%)",
+          background: "radial-gradient(circle, oklch(0.94 0.08 35 / 0.5), transparent 70%)",
           filter: "blur(60px)",
         }}
       />
@@ -70,7 +146,9 @@ function Index() {
           <Sparkles className="h-4 w-4 text-primary" />
           <span className="font-medium">Aura</span>
         </div>
-        <div className="text-xs text-muted-foreground">En línea</div>
+        <div className="text-xs text-muted-foreground">
+          {isSpeaking ? "Hablando…" : "En línea"}
+        </div>
       </header>
 
       {/* ORB */}
@@ -78,19 +156,18 @@ function Index() {
         aria-hidden
         className="pointer-events-none absolute left-1/2 z-10 flex justify-center"
         style={{
-         top: `${68 - progress * 45}%`,
+          top: `${68 - progress * 45}%`,
           transform: "translate(-50%, -50%)",
-          transition:
-            "top 1.2s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1)",
+          transition: "top 1.2s cubic-bezier(0.16, 1, 0.3, 1)",
         }}
       >
         <EnergyOrb scale={orbScale} />
       </div>
 
-      {/* TEXTO INICIAL (DEBAJO DEL ORB) */}
+      {/* TEXTO INICIAL */}
       {!hasMessages && (
         <div className="relative z-10 flex-1 flex flex-col items-center justify-end pb-40 text-center pointer-events-none">
-          <div className="mt-48"> {/* 👈 CLAVE: baja el texto */}
+          <div className="mt-48">
             <h1 className="text-4xl md:text-5xl font-light text-foreground">
               Hola.
             </h1>
@@ -107,10 +184,8 @@ function Index() {
           ref={scrollRef}
           className="relative z-10 flex-1 overflow-y-auto px-6"
           style={{
-            WebkitMaskImage:
-              "linear-gradient(to bottom, transparent 0%, transparent 30%, black 55%, black 100%)",
-            maskImage:
-              "linear-gradient(to bottom, transparent 0%, transparent 30%, black 55%, black 100%)",
+            WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, transparent 30%, black 55%, black 100%)",
+            maskImage: "linear-gradient(to bottom, transparent 0%, transparent 30%, black 55%, black 100%)",
           }}
         >
           <div
@@ -137,67 +212,40 @@ function Index() {
       )}
 
       {/* INPUT */}
-      <footer className="relative z-10 flex-shrink-0 px-6 pb- -20 pt-6">
+      <footer className="relative z-10 flex-shrink-0 px-6 pb-10 pt-6">
         <form
           onSubmit={async (e) => {
             e.preventDefault();
             if (!value.trim()) return;
-
             const userMessage = value;
-
-            setMessages((prev) => [
-              ...prev,
-              { role: "user", content: userMessage },
-            ]);
-
             setValue("");
-
-            try {
-              const res = await fetch(
-                "https://murielgg.app.n8n.cloud/webhook/dba585f4-889e-4a1c-97ec-48eaef2cdae9",
-                {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ message: userMessage }),
-                }
-              );
-
-              const reply = await res.text();
-
-              setMessages((prev) => [
-                ...prev,
-                { role: "assistant", content: reply },
-              ]);
-            } catch {
-              setMessages((prev) => [
-                ...prev,
-                {
-                  role: "assistant",
-                  content: "Ha ocurrido un error al responder.",
-                },
-              ]);
-            }
+            await sendMessage(userMessage);
           }}
           className="mx-auto flex w-full max-w-xl items-center gap-2 rounded-full bg-card/70 px-5 py-3 shadow-soft backdrop-blur-xl ring-1 ring-border transition focus-within:ring-2 focus-within:ring-primary/40"
         >
           <input
             value={value}
             onChange={(e) => setValue(e.target.value)}
-            placeholder="Pregúntale a Aura…"
+            placeholder={isListening ? "Escuchando…" : "Pregúntale a Aura…"}
             className="flex-1 bg-transparent text-sm md:text-base font-light text-foreground placeholder:text-muted-foreground/70 outline-none"
           />
 
           <button
             type="button"
-            className="grid h-9 w-9 place-items-center rounded-full bg-secondary"
+            onClick={toggleListening}
+            className={`grid h-9 w-9 place-items-center rounded-full transition ${
+              isListening
+                ? "bg-red-400 text-white animate-pulse"
+                : "bg-secondary text-foreground"
+            }`}
           >
-            <Mic className="h-4 w-4" />
+            {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
           </button>
 
           <button
             type="submit"
             disabled={!value.trim()}
-            className="grid h-9 w-9 place-items-center rounded-full bg-primary text-primary-foreground"
+            className="grid h-9 w-9 place-items-center rounded-full bg-primary text-primary-foreground disabled:opacity-40"
           >
             <ArrowUp className="h-4 w-4" />
           </button>
