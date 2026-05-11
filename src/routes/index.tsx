@@ -245,7 +245,7 @@ const speakText = (text: string) => {
       )}
 
       {/* INPUT */}
-      <footer className="relative z-10 flex-shrink-0 px-6 pb-10 pt-6">
+      <footer className="relative z-10 flex-shrink-0 px-6 pb-4 pt-6 mt-auto">
         <form
           onSubmit={async (e) => {
             e.preventDefault();
