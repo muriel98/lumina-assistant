@@ -153,7 +153,7 @@ const speakText = (text: string) => {
   };
 
   return (
-    <main className="relative min-h-screen w-full overflow-hidden flex flex-col">
+    <main className="relative h-screen w-full overflow-hidden flex flex-col">
 
       {/* Background */}
       <div
