@@ -189,7 +189,7 @@ const speakText = (text: string) => {
         aria-hidden
         className="pointer-events-none absolute left-1/2 z-10 flex justify-center"
         style={{
-          top: `${68 - progress * 45}%`,
+          top: `${78 - progress * 45}%`,
           transform: "translate(-50%, -50%)",
           transition: "top 1.2s cubic-bezier(0.16, 1, 0.3, 1)",
         }}
