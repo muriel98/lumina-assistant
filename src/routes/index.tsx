@@ -24,6 +24,13 @@ function clamp(val: number, min: number, max: number) {
 const SHRINK_AFTER = 6;
 
 function Index() {
+  const [userId] = useState(() => {
+  const stored = localStorage.getItem("aura_user_id");
+  if (stored) return stored;
+  const newId = crypto.randomUUID();
+  localStorage.setItem("aura_user_id", newId);
+  return newId;
+});
   const [value, setValue] = useState("");
   const [messages, setMessages] = useState<
     { role: "user" | "assistant"; content: string }[]
@@ -55,7 +62,7 @@ function Index() {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-         body: JSON.stringify({ message: text, voice: voiceMode }),
+         body: JSON.stringify({ message: text, voice: voiceMode, user_id: userId }),
         }
       );
 
