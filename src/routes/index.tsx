@@ -153,7 +153,7 @@ const speakText = (text: string) => {
   };
 
   return (
-    <main className="relative h-screen w-full overflow-hidden flex flex-col">
+    <main className="relative min-h-screen w-full overflow-hidden flex flex-col">
 
       {/* Background */}
       <div
@@ -245,7 +245,7 @@ const speakText = (text: string) => {
       )}
 
       {/* INPUT */}
-      <footer className="relative z-10 flex-shrink-0 px-6 pb-4 pt-6 mt-auto">
+      <footer className="relative z-10 flex-shrink-0 px-6 pb-4 pt-6 mb-8 mt-auto">
         <form
           onSubmit={async (e) => {
             e.preventDefault();
